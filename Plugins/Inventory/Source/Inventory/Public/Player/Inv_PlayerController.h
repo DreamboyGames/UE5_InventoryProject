@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Inv_PlayerController.generated.h"
 
+class UInv_InventoryComponent;
 class UInv_HUDWidget;
 class UInputAction;
 class UInputMappingContext;
@@ -21,23 +22,28 @@ public:
 	
 	virtual void Tick(float DeltaSeconds) override;
 	
+	UFUNCTION(BlueprintCallable)
+	void ToggleInventoryMenu();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	
 	
 private:
-	
-	void PrimaryInteract();
 	void CreateHUDWidget();
-	
 	void TraceForItem();
 	
+	void PrimaryInteract();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TArray<TObjectPtr<UInputMappingContext>> DefaultIMCs;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TObjectPtr<UInputAction> PrimaryInteractAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TObjectPtr<UInputAction> ToggleInventoryAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<UInv_HUDWidget> HUDWidgetClass;
@@ -56,4 +62,6 @@ private:
 	// TWeakObjectPtr does not affect GC status
 	TWeakObjectPtr<AActor> HitActor;
 	TWeakObjectPtr<AActor> LastHitActor;
+	
+	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 };

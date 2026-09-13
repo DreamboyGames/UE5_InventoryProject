@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Inventory.h"
 #include "Interaction/Inv_Highlightable.h"
+#include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "Items/Components/Inv_ItemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/HUD/Inv_HUDWidget.h"
@@ -21,6 +22,9 @@ AInv_PlayerController::AInv_PlayerController()
 void AInv_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	InventoryComponent = FindComponentByClass<UInv_InventoryComponent>();
+	checkf(InventoryComponent.IsValid(), TEXT("Player Controller should have an Inventory Component BP."));
 	
 	CreateHUDWidget();
 }
@@ -41,6 +45,7 @@ void AInv_PlayerController::SetupInputComponent()
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 	
 	EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Started, this, &ThisClass::PrimaryInteract);
+	EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Started, this, &ThisClass::ToggleInventoryMenu);
 }
 
 void AInv_PlayerController::CreateHUDWidget()
@@ -120,3 +125,8 @@ void AInv_PlayerController::PrimaryInteract()
 	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract"));
 }
 
+void AInv_PlayerController::ToggleInventoryMenu()
+{
+	if (!InventoryComponent.IsValid()) return;
+	InventoryComponent->ToggleInventoryMenu();
+}
