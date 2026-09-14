@@ -46,4 +46,9 @@ void UInv_SpatialInventory::DisableButton(UButton* Button) {
 	Button->SetIsEnabled(false);
 }
 
-
+FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemComponent* ItemComponent) const
+{
+	FInv_SlotAvailabilityResult Result;
+	Result.TotalRoomToFill = 1;
+	return Result;
+}

@@ -123,6 +123,12 @@ void AInv_PlayerController::TraceForItem()
 void AInv_PlayerController::PrimaryInteract()
 {
 	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract"));
+	if (!HitActor.IsValid()) return;
+	
+	UInv_ItemComponent* ItemComp = HitActor->FindComponentByClass<UInv_ItemComponent>();
+	if (!IsValid(ItemComp) || !InventoryComponent.IsValid()) return;
+	
+	InventoryComponent->TryAddItem(ItemComp);
 }
 
 void AInv_PlayerController::ToggleInventoryMenu()

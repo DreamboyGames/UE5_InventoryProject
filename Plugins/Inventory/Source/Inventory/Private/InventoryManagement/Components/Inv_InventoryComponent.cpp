@@ -2,11 +2,22 @@
 
 
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
+
+#include "Net/UnrealNetwork.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 
-UInv_InventoryComponent::UInv_InventoryComponent()
+UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+	bInventoryMenuOpen = false;
+}
+
+void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ThisClass, InventoryList)
 }
 
 void UInv_InventoryComponent::BeginPlay()
@@ -24,6 +35,14 @@ void UInv_InventoryComponent::ConstructInventory()
 	InventoryMenu = CreateWidget<UInv_InventoryBase>(OwningPlayerController.Get(), InventoryMenuClass);
 	InventoryMenu->AddToViewport();
 	CloseInventoryMenu();
+}
+
+void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
+{
+	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))
+	{
+		AddReplicatedSubObject(SubObj);	
+	}
 }
 
 void UInv_InventoryComponent::ToggleInventoryMenu()
@@ -54,3 +73,48 @@ void UInv_InventoryComponent::CloseInventoryMenu()
 	OwningPlayerController->SetInputMode(InputMode);
 	OwningPlayerController->SetShowMouseCursor(false);
 }
+
+void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
+{
+	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
+	
+	// Inventory Slot is Full
+	if (Result.TotalRoomToFill == 0)
+	{
+		NoRoomInInventory.Broadcast();
+		return;
+	}
+	
+	if (Result.Item.IsValid() && Result.bStackable)
+	{
+		// Add stacks to an item that already exists in the inventory. Only update the stack count, not create a new item of this type.
+		Server_AddStacksToItem(ItemComponent, Result.TotalRoomToFill, Result.Remainder);
+	}
+	else if (Result.TotalRoomToFill > 0)
+	{
+		// This item type doesn't exist in the inventory. Create a new one and update all pertinent slots.
+		Server_AddNewItem(ItemComponent, Result.bStackable ? Result.TotalRoomToFill : 0);
+	}
+	
+	// @TODO: add item to inventory
+}
+
+void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
+{
+	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
+	
+	if (GetOwner()->GetNetMode() == ENetMode::NM_ListenServer || GetOwner()->GetNetMode() == ENetMode::NM_Standalone)
+	{
+		// Not client to replicate to. We are the server or standalone. PostReplicated() calls OnItemAdded.Broadcast() for clients.
+		OnItemAdded.Broadcast(NewItem);
+	}
+	
+	// @TODO: Tell the Item Component to destroy its owning actor.
+}
+
+void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
+{
+	
+}
+
+
