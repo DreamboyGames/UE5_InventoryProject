@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
 #include "Types/Inv_GridTypes.h"
 #include "Inv_InventoryGrid.generated.h"
 
+class UInv_SlottedItem;
+struct FInv_ItemManifest;
+class UInv_ItemComponent;
 class UInv_InventoryComponent;
 class UCanvasPanel;
 class UInv_GridSlot;
@@ -24,12 +28,21 @@ public:
 	
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 	
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* ItemComponent);
+	
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 	
 private:
 	
 	void ConstructGrid();
+	
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
+	UInv_SlottedItem* CreateSlottedItem(UInv_InventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount, const FInv_GridFragment* GridFragment,const FInv_ImageFragment* ImageFragment) const;
+	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem) const;
+	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index, bool bStackableItem, const int32 StackAmount);
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 	
@@ -46,6 +59,12 @@ private:
 	TObjectPtr<UCanvasPanel> CanvasPanel;
 	
 	UPROPERTY(EditAnywhere, Category="Inventory")
+	TSubclassOf<UInv_SlottedItem> SlottedItemClass;
+	
+	UPROPERTY()
+	TMap<int32, TObjectPtr<UInv_SlottedItem>> SlottedItems;
+	
+	UPROPERTY(EditAnywhere, Category="Inventory")
 	int32 Rows;
 	
 	UPROPERTY(EditAnywhere, Category="Inventory")
@@ -55,4 +74,7 @@ private:
 	float TileSize;
 	
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
+	void AddItemAtIndex(UInv_InventoryItem* NewItem, const int32 Index, const bool bStackable, const int32 StackAmount);
+	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment) const;
+	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
 };

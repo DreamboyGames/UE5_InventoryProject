@@ -29,3 +29,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Replicated, meta=(BaseStruct="/Script/Inventory.Inv_ItemManifest"), Category = "Inventory")
 	FInstancedStruct ItemManifest;
 };
+
+template<typename TFragmentType>
+const TFragmentType* GetFragment(const UInv_InventoryItem* Item, const FGameplayTag& Tag)
+{
+	if (!IsValid(Item)) return nullptr;
+	const FInv_ItemManifest& Manifest = Item->GetItemManifest();
+	return Manifest.GetFragmentOfTypeWithTag<TFragmentType>(Tag);
+}
