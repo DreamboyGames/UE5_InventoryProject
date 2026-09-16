@@ -87,4 +87,7 @@ private:
 	void AddItemAtIndex(UInv_InventoryItem* NewItem, const int32 Index, const bool bStackable, const int32 StackAmount);
 	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment) const;
 	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
+	
+	UFUNCTION()
+	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 };

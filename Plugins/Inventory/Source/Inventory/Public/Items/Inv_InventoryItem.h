@@ -23,12 +23,17 @@ public:
 	FInv_ItemManifest& GetItemManifestMutable() { return ItemManifest.GetMutable<FInv_ItemManifest>(); }
 	bool IsStackable() const;
 	
+	int32 GetTotalStackCount() const { return TotalStackCount; }
+	void SetTotalStackCount(int32 Count) { TotalStackCount = Count; }
+	
 private:
 	
-	// INSTANCED STRUCTS: struct is instanced along with its owner, can be used polymorphically, can be exposed to Blueprint, 
-	// without the performance overhead of UObject pointers.
+	// INSTANCED STRUCTS: struct is instanced along with its owner, can be used polymorphically, can be exposed to Blueprint, without the performance overhead of UObject pointers.
 	UPROPERTY(VisibleAnywhere, Replicated, meta=(BaseStruct="/Script/Inventory.Inv_ItemManifest"), Category = "Inventory")
 	FInstancedStruct ItemManifest;
+	
+	UPROPERTY(Replicated)
+	int32 TotalStackCount{0};
 };
 
 template<typename TFragmentType>
