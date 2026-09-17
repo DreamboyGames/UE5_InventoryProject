@@ -32,8 +32,8 @@ public class Inventory : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -42,12 +42,11 @@ public class Inventory : ModuleRules
 				"Slate",
 				"SlateCore", 
 				"EnhancedInput",
+				"InputCore",
 				"UMG",
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		
-		
+		);
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
