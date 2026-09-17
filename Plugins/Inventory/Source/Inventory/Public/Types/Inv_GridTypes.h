@@ -37,3 +37,47 @@ struct FInv_SlotAvailabilityResult {
 	bool bStackable{false};
 	TArray<FInv_SlotAvailability> SlotAvailabilities;
 };
+
+
+UENUM(BlueprintType)
+enum class EInv_TileQuadrant : uint8 {
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight,
+	None
+};
+
+USTRUCT(BlueprintType)
+struct FInv_TileParameters {
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	FIntPoint TileCoordinates{};
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	int32 TileIndex{INDEX_NONE};
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	EInv_TileQuadrant TileQuadrant{EInv_TileQuadrant::None};
+};
+
+inline bool operator==(const FInv_TileParameters& a, const FInv_TileParameters& b)
+{
+	return a.TileCoordinates == b.TileCoordinates && a.TileIndex == b.TileIndex && a.TileQuadrant == b.TileQuadrant;
+}
+
+
+USTRUCT()
+struct FInv_SpaceQueryResult {
+	GENERATED_BODY()
+	
+	// Tru if the space queried has no items in it
+	bool bHasSpace{false};
+	
+	// Valid if there is a single item we can swap with
+	TWeakObjectPtr<UInv_InventoryItem> ValidItem{nullptr};
+	
+	// Upper left index of the valid item, if there is one.
+	int32 ValidItemUpperLeftIndex{INDEX_NONE};	
+};
